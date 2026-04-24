@@ -1,8 +1,14 @@
 @extends('layouts.frontend')
 
 @section('content')
-    <div class="container">
-        <h1>Recommendation</h1>
-        <p>This is where the system recommendation will be displayed.</p>
-    </div>
+
+<h2 class="text-xl font-bold mb-4">Rekomendasi Sistem</h2>
+
+<div class="bg-white p-4 rounded shadow">
+    <p><b>Tipe:</b> Rumah Tangga</p>
+    <p><b>Sistem:</b> Off-grid</p>
+    <p><b>Panel:</b> 4 - 8 unit</p>
+    <p><b>Biaya:</b> Rp 10jt - 25jt</p>
+</div>
+
 @endsection

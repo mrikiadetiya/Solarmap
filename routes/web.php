@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\ReportController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/map', [MapController::class, 'index'])->name('map');
-Route::post('/analysis', [AnalysisController::class, 'index'])->name('analysis');
+Route::match(['get', 'post'], '/analysis', [AnalysisController::class, 'index'])->name('analysis');
 Route::get('/calculator', [CalculatorController::class, 'index'])->name('calculator');
 Route::post('/calculator/calculate', [CalculatorController::class, 'calculate'])->name('calculator.calculate');
 Route::get('/cost', [CostController::class, 'index'])->name('cost');
