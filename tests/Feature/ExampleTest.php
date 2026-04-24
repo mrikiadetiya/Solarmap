@@ -16,4 +16,18 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_map_page_returns_a_successful_response(): void
+    {
+        $response = $this->get('/map');
+
+        $response->assertStatus(200);
+    }
+
+    public function test_calculator_page_returns_a_successful_response(): void
+    {
+        $response = $this->get('/calculator');
+
+        $response->assertStatus(200);
+    }
 }
