@@ -166,7 +166,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="/dashboard" class="mt-6 w-full block text-center bg-brand-orange hover:bg-orange-600 text-white font-semibold py-4 rounded-xl shadow-lg transition">
+                <a href="/map" class="mt-6 w-full block text-center bg-brand-orange hover:bg-orange-600 text-white font-semibold py-4 rounded-xl shadow-lg transition">
                     <i class="fa-regular fa-map mr-2"></i> Buka Dashboard Peta
                 </a>
             </div>

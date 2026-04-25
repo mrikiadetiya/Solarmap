@@ -7,11 +7,18 @@ use Illuminate\Http\Request;
 
 use App\Services\CalculationService;
 
+use App\Models\Region;
+
 class CalculatorController extends Controller
 {
     public function index()
     {
-        return view('frontend.calculator');
+        $regions = Region::with(['solarData'])->get()->map(function($region) {
+            $region->avg_ghi = $region->solarData->avg('ghi') ?? 4.8;
+            return $region;
+        });
+
+        return view('frontend.calculator', compact('regions'));
     }
 
     public function calculate(Request $request, CalculationService $calculationService)

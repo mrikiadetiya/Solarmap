@@ -9,21 +9,21 @@
     
     <div class="h-14 flex items-center justify-between px-4 border-b border-gray-200 bg-white shadow-sm z-10 relative">
         <div class="flex items-center gap-4 text-sm text-gray-600">
-            <button class="flex items-center gap-2 hover:text-gray-900 transition">
-                <i class="fa-regular fa-square"></i> Sembunyikan Panel
+            <button id="toggle-sidebar" class="flex items-center gap-2 hover:text-gray-900 transition">
+                <i class="fa-regular fa-square"></i> <span id="toggle-text">Sembunyikan Panel</span>
             </button>
             <span class="text-gray-300">|</span>
-            <span class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-gray-400"></i> 10 lokasi terpetakan</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-gray-400"></i> <span id="location-count">{{ $regions->count() }}</span> lokasi terpetakan</span>
         </div>
 
         <div class="flex bg-gray-100 rounded-md p-1 border border-gray-200">
-            <button class="px-3 py-1 text-xs font-medium bg-white text-brand-orange shadow rounded">Heatmap</button>
-            <button class="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-900">Satelit</button>
-            <button class="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-900">Terrain</button>
+            <button onclick="changeLayer('streets')" id="btn-layer-streets" class="layer-btn px-3 py-1 text-xs font-medium bg-white text-brand-orange shadow rounded">Peta</button>
+            <button onclick="changeLayer('satellite')" id="btn-layer-satellite" class="layer-btn px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-900">Satelit</button>
+            <button onclick="changeLayer('terrain')" id="btn-layer-terrain" class="layer-btn px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-900">Terrain</button>
         </div>
 
         <div>
-            <button class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition">
+            <button onclick="downloadCSV()" class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition">
                 <i class="fa-solid fa-download"></i> Unduh Data
             </button>
         </div>
@@ -31,16 +31,16 @@
 
     <div class="flex flex-1 overflow-hidden relative z-0">
         
-        <div class="w-80 bg-white border-r border-gray-200 flex flex-col z-10 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.05)] relative">
+        <div id="sidebar" class="w-80 bg-white border-r border-gray-200 flex flex-col z-10 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.05)] relative transition-all duration-300">
             
             <div class="p-4 border-b border-gray-100">
                 <h3 class="font-bold text-gray-900 mb-3 text-sm">Pencarian Lokasi</h3>
                 <div class="relative mb-3">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" placeholder="Cari desa, kabupaten, provinsi..." 
+                    <input type="text" id="search-location" placeholder="Cari desa, kabupaten, provinsi..." 
                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-orange focus:border-brand-orange placeholder-gray-400">
                 </div>
-                <button class="w-full py-2 border border-brand-orange text-brand-orange text-sm font-medium rounded-lg hover:bg-orange-50 transition flex items-center justify-center gap-2">
+                <button id="btn-detect-location" class="w-full py-2 border border-brand-orange text-brand-orange text-sm font-medium rounded-lg hover:bg-orange-50 transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-crosshairs"></i> Deteksi Lokasi Saya (GPS)
                 </button>
             </div>
@@ -49,81 +49,45 @@
                 
                 <div class="mb-6">
                     <p class="text-xs font-bold text-gray-500 mb-3 tracking-wider">BOOKMARK</p>
-                    <div class="space-y-1">
-                        <div class="flex items-start justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition">
+                    <div id="bookmark-list" class="space-y-1">
+                        @foreach($regions->take(2) as $region)
+                        <div onclick="focusLocation({{ $region->id }}, {{ $region->latitude }}, {{ $region->longitude }})" class="flex items-start justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition">
                             <div class="flex gap-3">
                                 <i class="fa-solid fa-star text-yellow-400 mt-1"></i>
                                 <div>
-                                    <h4 class="text-sm font-semibold text-gray-900">Desa Wairasa</h4>
-                                    <p class="text-xs text-gray-500">Sumba Tengah</p>
+                                    <h4 class="text-sm font-semibold text-gray-900">{{ $region->name }}</h4>
+                                    <p class="text-xs text-gray-500">Provinsi NTT</p>
                                 </div>
                             </div>
                             <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Tinggi</span>
                         </div>
-                        <div class="flex items-start justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition">
-                            <div class="flex gap-3">
-                                <i class="fa-solid fa-star text-yellow-400 mt-1"></i>
-                                <div>
-                                    <h4 class="text-sm font-semibold text-gray-900">Desa Rote</h4>
-                                    <p class="text-xs text-gray-500">Rote Ndao</p>
-                                </div>
-                            </div>
-                            <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Tinggi</span>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
                 <div>
-                    <p class="text-xs font-bold text-gray-500 mb-3 tracking-wider uppercase">Semua Lokasi (10)</p>
-                    <div class="space-y-1">
-                        <div class="flex items-start justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition border border-transparent hover:border-gray-100">
+                    <p class="text-xs font-bold text-gray-500 mb-3 tracking-wider uppercase">Semua Lokasi (<span id="visible-count">{{ $regions->count() }}</span>)</p>
+                    <div id="location-list" class="space-y-1">
+                        @foreach($regions as $region)
+                        <div data-name="{{ strtolower($region->name) }}" onclick="focusLocation({{ $region->id }}, {{ $region->latitude }}, {{ $region->longitude }})" class="location-item flex items-start justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition border border-transparent hover:border-gray-100">
                             <div class="flex gap-3">
-                                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-location-dot text-brand-orange text-sm"></i>
+                                <div class="w-8 h-8 rounded-full {{ $region->avg_ghi > 6 ? 'bg-orange-100' : ($region->avg_ghi > 5.5 ? 'bg-yellow-100' : 'bg-blue-100') }} flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-location-dot {{ $region->avg_ghi > 6 ? 'text-brand-orange' : ($region->avg_ghi > 5.5 ? 'text-yellow-600' : 'text-blue-600') }} text-sm"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-semibold text-gray-900">Desa Wairasa</h4>
-                                    <p class="text-xs text-gray-500">Umbu Ratu Nggay, NTT</p>
-                                    <p class="text-xs font-bold text-brand-orange mt-0.5">6.2 kWh/m²</p>
+                                    <h4 class="text-sm font-semibold text-gray-900">{{ $region->name }}</h4>
+                                    <p class="text-xs text-gray-500">Indonesia</p>
+                                    <p class="text-xs font-bold text-brand-orange mt-0.5">{{ number_format($region->avg_ghi, 1) }} kWh/m²</p>
                                 </div>
                             </div>
                             <div class="flex flex-col items-end justify-between h-full py-1">
-                                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Tinggi</span>
-                                <i class="fa-solid fa-star text-yellow-400 text-xs mt-2"></i>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition border border-transparent hover:border-gray-100">
-                            <div class="flex gap-3">
-                                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-location-dot text-brand-orange text-sm"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-semibold text-gray-900">Desa Larantuka</h4>
-                                    <p class="text-xs text-gray-500">Larantuka, NTT</p>
-                                    <p class="text-xs font-bold text-brand-orange mt-0.5">5.8 kWh/m²</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-col items-end justify-between h-full py-1">
-                                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Tinggi</span>
+                                <span class="{{ $region->avg_ghi > 6 ? 'bg-green-100 text-green-700' : ($region->avg_ghi > 5.5 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700') }} text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                    {{ $region->avg_ghi > 6 ? 'Tinggi' : ($region->avg_ghi > 5.5 ? 'Sedang' : 'Rendah') }}
+                                </span>
                                 <i class="fa-regular fa-star text-gray-300 hover:text-yellow-400 text-xs mt-2 transition"></i>
                             </div>
                         </div>
-
-                        <div class="flex items-start justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition border border-transparent hover:border-gray-100">
-                            <div class="flex gap-3">
-                                <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-location-dot text-yellow-600 text-sm"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-semibold text-gray-900">Desa Soa</h4>
-                                    <p class="text-xs text-gray-500">Soa, NTT</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-col items-end justify-between h-full py-1">
-                                <span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Sedang</span>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -136,7 +100,6 @@
 </div>
 
 <style>
-    /* Styling custom scrollbar untuk sidebar */
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
@@ -151,7 +114,6 @@
         background: #9ca3af; 
     }
     
-    /* Penyesuaian kontrol Leaflet agar letaknya pas */
     .leaflet-control-zoom {
         border: none !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
@@ -163,61 +125,185 @@
     .leaflet-control-zoom a:hover {
         background-color: #f9fafb !important;
     }
+
+    .sidebar-hidden {
+        margin-left: -320px;
+    }
 </style>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Inisialisasi Peta
-    // Menggunakan koordinat tengah Indonesia sesuai gambar
-    var map = L.map('map', {
-        zoomControl: false // Kita matikan default zoom control untuk memindahkannya
-    }).setView([-2.5489, 118.0149], 5);
+    var map;
+    var markers = {};
+    var layers = {};
+    var regionsData = @json($regions);
 
-    // 2. Tambahkan Tile Layer (Peta Dasar)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18,
-    }).addTo(map);
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Inisialisasi Peta
+        map = L.map('map', {
+            zoomControl: false
+        }).setView([-2.5489, 118.0149], 5);
 
-    // 3. Pindahkan Zoom Control ke Kanan Atas (seperti di gambar)
-    L.control.zoom({
-        position: 'topright'
-    }).addTo(map);
-
-    // 4. Custom Marker Icons
-    // Kita buat tiga warna icon marker (Tinggi/Sedang/Rendah) berdasarkan warna di desain
-    var createCustomIcon = function(colorClass) {
-        return L.divIcon({
-            className: 'custom-div-icon',
-            html: `<div style="background-color: ${colorClass}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
+        // 2. Tile Layers
+        layers.streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
         });
-    };
 
-    var iconGreen = createCustomIcon('#10B981'); // Hijau (Tinggi)
-    var iconOrange = createCustomIcon('#F97316'); // Oranye/Kuning (Sedang)
-    var iconRed = createCustomIcon('#EF4444');    // Merah (Rendah)
+        layers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        });
 
-    // 5. Tambahkan Data Marker Contoh Sesuai Gambar
-    // Area NTT & sekitarnya (Hijau/Tinggi)
-    L.marker([-9.6, 119.5], {icon: iconGreen}).addTo(map).bindPopup("<b>Desa Wairasa</b><br>Potensi: Tinggi (6.2 kWh/m²)");
-    L.marker([-10.7, 123.1], {icon: iconGreen}).addTo(map);
-    L.marker([-8.3, 122.9], {icon: iconGreen}).addTo(map);
-    L.marker([-8.6, 120.5], {icon: iconGreen}).addTo(map);
+        layers.terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap (CC-BY-SA)'
+        });
 
-    // Area Kalimantan (Oranye/Sedang)
-    L.marker([0.5, 115.5], {icon: iconOrange}).addTo(map);
-    L.marker([1.2, 116.0], {icon: iconOrange}).addTo(map);
+        layers.streets.addTo(map);
 
-    // Area Nusa Tenggara Barat (Oranye/Sedang)
-    L.marker([-8.5, 117.5], {icon: iconOrange}).addTo(map);
-    L.marker([-8.8, 118.5], {icon: iconOrange}).addTo(map);
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(map);
 
-    // Area Papua (Merah/Rendah)
-    L.marker([-4.0, 138.0], {icon: iconRed}).addTo(map);
-});
+        // 3. Markers
+        const createCustomIcon = function(color) {
+            return L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+        };
+
+        regionsData.forEach(region => {
+            let color = '#3B82F6'; // Blue (Rendah)
+            if (region.avg_ghi > 6) color = '#10B981'; // Green (Tinggi)
+            else if (region.avg_ghi > 5.5) color = '#F97316'; // Orange (Sedang)
+
+            let marker = L.marker([region.latitude, region.longitude], {
+                icon: createCustomIcon(color)
+            }).addTo(map);
+
+            marker.bindPopup(`
+                <div class="p-1">
+                    <h3 class="font-bold text-sm">${region.name}</h3>
+                    <p class="text-xs text-gray-600">Potensi Solar: <b>${parseFloat(region.avg_ghi).toFixed(1)} kWh/m²</b></p>
+                    <a href="/analysis?region=${region.id}" class="text-[10px] text-brand-orange font-bold mt-2 block hover:underline">LIHAT DETAIL</a>
+                </div>
+            `);
+
+            markers[region.id] = marker;
+        });
+
+        // 4. Sidebar Toggle
+        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleText = document.getElementById('toggle-text');
+            sidebar.classList.toggle('sidebar-hidden');
+            
+            if (sidebar.classList.contains('sidebar-hidden')) {
+                toggleText.innerText = 'Tampilkan Panel';
+            } else {
+                toggleText.innerText = 'Sembunyikan Panel';
+            }
+            
+            // Invalidate map size after transition
+            setTimeout(() => map.invalidateSize(), 300);
+        });
+
+        // 5. Search Function
+        document.getElementById('search-location').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.location-item');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const name = item.getAttribute('data-name');
+                if (name.includes(query)) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            document.getElementById('visible-count').innerText = visibleCount;
+        });
+
+        // 6. GPS Detect (Already implemented, keep it)
+        document.getElementById('btn-detect-location').addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                alert("Geolocation tidak didukung oleh browser Anda");
+                return;
+            }
+
+            const btn = this;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendeteksi...';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+                    map.setView([lat, lng], 13);
+                    if (window.userMarker) map.removeLayer(window.userMarker);
+                    window.userMarker = L.marker([lat, lng]).addTo(map).bindPopup("Lokasi Anda").openPopup();
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                },
+                function(error) {
+                    alert("Gagal mendapatkan lokasi: " + error.message);
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                }
+            );
+        });
+    });
+
+    function focusLocation(id, lat, lng) {
+        map.flyTo([lat, lng], 12);
+        markers[id].openPopup();
+        
+        // Mobile view: hide sidebar when location selected
+        if (window.innerWidth < 768) {
+            document.getElementById('sidebar').classList.add('sidebar-hidden');
+            document.getElementById('toggle-text').innerText = 'Tampilkan Panel';
+            setTimeout(() => map.invalidateSize(), 300);
+        }
+    }
+
+    function changeLayer(layerKey) {
+        // Remove all layers
+        for (let key in layers) {
+            map.removeLayer(layers[key]);
+        }
+        // Add selected layer
+        layers[layerKey].addTo(map);
+
+        // Update buttons
+        document.querySelectorAll('.layer-btn').forEach(btn => {
+            btn.classList.remove('bg-white', 'text-brand-orange', 'shadow');
+            btn.classList.add('text-gray-600', 'hover:text-gray-900');
+        });
+
+        const activeBtn = document.getElementById('btn-layer-' + layerKey);
+        activeBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
+        activeBtn.classList.add('bg-white', 'text-brand-orange', 'shadow');
+    }
+
+    function downloadCSV() {
+        let csvContent = "data:text/csv;charset=utf-8,ID,Name,Latitude,Longitude,Avg GHI\n";
+        regionsData.forEach(region => {
+            csvContent += `${region.id},${region.name},${region.latitude},${region.longitude},${region.avg_ghi}\n`;
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "solar_data_regions.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 </script>
 
 @endsection
